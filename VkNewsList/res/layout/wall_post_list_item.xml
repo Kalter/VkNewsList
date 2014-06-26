@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/wall_post_list_item"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <!-- android:layout_width="337dp" -->
+
+    <LinearLayout
+        android:id="@+id/post_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/post_text"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/post_header"
+        android:focusable="false"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp" />
+
+    <LinearLayout
+        android:id="@+id/image_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/post_text"
+        android:focusable="false"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/post_share_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/image_container"
+        android:layout_marginLeft="2dp"
+        android:focusable="false"
+        android:text="@string/share" />
+
+    <TextView
+        android:id="@+id/post_share_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/image_container"
+        android:layout_toRightOf="@id/post_share_button"
+        android:paddingLeft="4dp" />
+
+    <TextView
+        android:id="@+id/post_like_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/image_container"
+        android:paddingRight="4dp" />
+
+    <Button
+        android:id="@+id/post_like_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/image_container"
+        android:layout_marginLeft="2dp"
+        android:layout_toLeftOf="@id/post_like_count"
+        android:focusable="false"
+        android:text="@string/like" />
+
+</RelativeLayout>

@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="app_name">VkNewsList</string>
+    <string name="auth">Авторизация</string>
+    <string name="news">Новости</string>
+    <string name="share">Репост</string>
+    <string name="like">Мне нравится</string>
+
+</resources>
