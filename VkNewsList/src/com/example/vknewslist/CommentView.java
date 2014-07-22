@@ -50,34 +50,34 @@ public class CommentView extends CustomView {
 			Map<Integer, VKApiCommunity> groups, View view,
 			LayoutInflater inflater, Context ctx) {
 		this.comment = comment;
-		this.users = users;
-		this.groups = groups;
-		this.view = view;
-		this.inflater = inflater;
-		this.ctx = ctx;
+		this.mUsers = users;
+		this.mGroups = groups;
+		this.mView = view;
+		this.mInflater = inflater;
+		this.mContext = ctx;
 	}
 
 	public View setupComment(ViewGroup parent) {
-		if (view == null) {
-			view = inflater.inflate(R.layout.comment, parent, false);
+		if (mView == null) {
+			mView = mInflater.inflate(R.layout.comment, parent, false);
 		}
 
 		VKAttachments attachments = null;
-		imageLoader.init(ImageLoaderConfiguration.createDefault(ctx));
+		mImageLoader.init(ImageLoaderConfiguration.createDefault(mContext));
 
 		holder = new ViewHolder();
 
-		holder.commentCountOfLike = (TextView) view
+		holder.commentCountOfLike = (TextView) mView
 				.findViewById(R.id.comment_like_count);
-		holder.commentLikeButton = (Button) view
+		holder.commentLikeButton = (Button) mView
 				.findViewById(R.id.comment_like_button);
-		holder.commentDate = (TextView) view.findViewById(R.id.comment_date);
-		holder.commentUserName = (TextView) view
+		holder.commentDate = (TextView) mView.findViewById(R.id.comment_date);
+		holder.commentUserName = (TextView) mView
 				.findViewById(R.id.comment_user_name);
-		holder.commentText = (TextView) view.findViewById(R.id.comment_text);
-		holder.commentUserImage = (ImageView) view
+		holder.commentText = (TextView) mView.findViewById(R.id.comment_text);
+		holder.commentUserImage = (ImageView) mView
 				.findViewById(R.id.comment_user_image);
-		holder.commentImageContainer = (LinearLayout) view
+		holder.commentImageContainer = (LinearLayout) mView
 				.findViewById(R.id.comment_image_container);
 
 		if (holder.commentImageContainer.getChildCount() > 0) {
@@ -94,8 +94,8 @@ public class CommentView extends CustomView {
 			holder.commentText.setVisibility(View.GONE);
 		}
 		
-		imageLoader.displayImage(getPhoto100(comment.from_id),
-				holder.commentUserImage, options, animateFirstListener);
+		mImageLoader.displayImage(getPhoto100(comment.from_id),
+				holder.commentUserImage, mOptions, mAnimateFirstListener);
 		
 		if (comment.attachments != null && comment.attachments.size() > 0) {
 			attachments = comment.attachments;
@@ -162,7 +162,7 @@ public class CommentView extends CustomView {
 				}
 			}
 		});
-		return view;
+		return mView;
 	}
 
 	

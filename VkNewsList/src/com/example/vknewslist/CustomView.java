@@ -25,32 +25,32 @@ import com.vk.sdk.api.model.VKAttachments;
 import com.vk.sdk.api.model.VKAttachments.VKApiAttachment;
 
 public class CustomView {
-	protected DisplayImageOptions options = new DisplayImageOptions.Builder()
+	protected DisplayImageOptions mOptions = new DisplayImageOptions.Builder()
 			.cacheOnDisc(true).considerExifParams(true)
 			// .displayer(new RoundedBitmapDisplayer(20))
 			.build();;
-	protected ImageLoader imageLoader = ImageLoader.getInstance();
-	protected ImageLoadingListener animateFirstListener = new AnimateFirstDisplayListener();
+	protected ImageLoader mImageLoader = ImageLoader.getInstance();
+	protected ImageLoadingListener mAnimateFirstListener = new AnimateFirstDisplayListener();
 
-	protected Context ctx;
-	protected LayoutInflater inflater;
-	protected View view;
-	protected Map<Integer, VKApiUser> users;
-	protected Map<Integer, VKApiCommunity> groups;
+	protected Context mContext;
+	protected LayoutInflater mInflater;
+	protected View mView;
+	protected Map<Integer, VKApiUser> mUsers;
+	protected Map<Integer, VKApiCommunity> mGroups;
 
 	protected String getName(int id) {
 		if (id > 0) {
-			return users.get(id).first_name + " " + users.get(id).last_name;
+			return mUsers.get(id).first_name + " " + mUsers.get(id).last_name;
 		} else {
-			return groups.get(id * (-1)).name;
+			return mGroups.get(id * (-1)).name;
 		}
 	}
 
 	protected String getPhoto100(int id) {
 		if (id > 0) {
-			return users.get(id).photo_100;
+			return mUsers.get(id).photo_100;
 		} else {
-			return groups.get(id * (-1)).photo_100;
+			return mGroups.get(id * (-1)).photo_100;
 		}
 	}
 
@@ -62,24 +62,24 @@ public class CustomView {
 	protected void showImage(LinearLayout layout, VKAttachments attachments) {
 		for (VKApiAttachment a : attachments) {
 			if (a.getClass() == VKApiPhoto.class) {
-				ImageView photo = (ImageView) inflater.inflate(
+				ImageView photo = (ImageView) mInflater.inflate(
 						R.layout.post_image, null);
 				VKApiPhoto p = (VKApiPhoto) a;
 				if (p.photo_807 != null && p.photo_807.length() > 0) {
-					imageLoader.displayImage(p.photo_807, photo, options,
-							animateFirstListener);
+					mImageLoader.displayImage(p.photo_807, photo, mOptions,
+							mAnimateFirstListener);
 				} else {
 					if (p.photo_604 != null && p.photo_604.length() > 0) {
-						imageLoader.displayImage(p.photo_604, photo, options,
-								animateFirstListener);
+						mImageLoader.displayImage(p.photo_604, photo, mOptions,
+								mAnimateFirstListener);
 					} else {
 						if (p.photo_130 != null && p.photo_130.length() > 0) {
-							imageLoader.displayImage(p.photo_130, photo,
-									options, animateFirstListener);
+							mImageLoader.displayImage(p.photo_130, photo,
+									mOptions, mAnimateFirstListener);
 						} else {
 							if (p.photo_75 != null && p.photo_75.length() > 0) {
-								imageLoader.displayImage(p.photo_75, photo,
-										options, animateFirstListener);
+								mImageLoader.displayImage(p.photo_75, photo,
+										mOptions, mAnimateFirstListener);
 							}
 						}
 					}
