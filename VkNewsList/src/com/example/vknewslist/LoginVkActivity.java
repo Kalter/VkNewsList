@@ -18,13 +18,14 @@ public class LoginVkActivity extends Activity {
 
 	private static final String[] sMyScope = new String[] { VKScope.WALL,
 			VKScope.FRIENDS };
+	private static final String APP_ID = "4422684";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		VKUIHelper.onCreate(this);
-		VKSdk.initialize(sdkListener, "4422684");
+		VKSdk.initialize(sdkListener, APP_ID);
 		
 		if (VKSdk.wakeUpSession()) {
 			startNewsActivity();
