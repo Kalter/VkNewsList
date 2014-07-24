@@ -85,10 +85,10 @@ public class WallPostEndlessAdapter extends EndlessAdapter {
 						"groups"), VKApiCommunity.class);
 
 				for (VKApiCommunity gr : g) {
-					adapter.groups.put(gr.id, gr);
+					adapter.mGroups.put(gr.id, gr);
 				}
 				for (VKApiUser us : u) {
-					adapter.users.put(us.id, us);
+					adapter.mUsers.put(us.id, us);
 				}
 				finish();
 				adapter.startFrom += adapter.count + 1;
@@ -104,7 +104,7 @@ public class WallPostEndlessAdapter extends EndlessAdapter {
 	}
 
 	private void finish() {
-		adapter.posts.addAll(p);
+		adapter.mPosts.addAll(p);
 	}
 
 	void startProgressAnimation() {

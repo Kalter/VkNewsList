@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.example.vknewslist.PostsListAdapter.ViewHolder;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
@@ -20,25 +21,26 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.vk.sdk.api.model.VKApiCommunity;
 import com.vk.sdk.api.model.VKApiPhoto;
+import com.vk.sdk.api.model.VKApiPost;
 import com.vk.sdk.api.model.VKApiUser;
 import com.vk.sdk.api.model.VKAttachments;
 import com.vk.sdk.api.model.VKAttachments.VKApiAttachment;
 
 public class CustomView {
-	protected DisplayImageOptions mOptions = new DisplayImageOptions.Builder()
+	public DisplayImageOptions mOptions = new DisplayImageOptions.Builder()
 			.cacheOnDisc(true).considerExifParams(true)
 			// .displayer(new RoundedBitmapDisplayer(20))
 			.build();;
-	protected ImageLoader mImageLoader = ImageLoader.getInstance();
-	protected ImageLoadingListener mAnimateFirstListener = new AnimateFirstDisplayListener();
+	public ImageLoader mImageLoader = ImageLoader.getInstance();
+	public ImageLoadingListener mAnimateFirstListener = new AnimateFirstDisplayListener();
 
-	protected Context mContext;
-	protected LayoutInflater mInflater;
-	protected View mView;
-	protected Map<Integer, VKApiUser> mUsers;
-	protected Map<Integer, VKApiCommunity> mGroups;
+	public Context mContext;
+	public LayoutInflater mInflater;
+	public View convertView;
+	public Map<Integer, VKApiUser> mUsers;
+	public Map<Integer, VKApiCommunity> mGroups;
 
-	protected String getName(int id) {
+	public String getName(int id) {
 		if (id > 0) {
 			return mUsers.get(id).first_name + " " + mUsers.get(id).last_name;
 		} else {
@@ -46,7 +48,15 @@ public class CustomView {
 		}
 	}
 
-	protected String getPhoto100(int id) {
+	public void setUsers(Map<Integer, VKApiUser> mUsers) {
+		this.mUsers = mUsers;
+	}
+
+	public void setGroups(Map<Integer, VKApiCommunity> mGroups) {
+		this.mGroups = mGroups;
+	}
+
+	public String getPhoto100(int id) {
 		if (id > 0) {
 			return mUsers.get(id).photo_100;
 		} else {
@@ -54,12 +64,12 @@ public class CustomView {
 		}
 	}
 
-	protected String translateDate(long date) {
+	public String translateDate(long date) {
 		return (new SimpleDateFormat("HH:mm   dd.MM.yyyy"))
 				.format(new java.util.Date((long) date * 1000));
 	}
 
-	protected void showImage(LinearLayout layout, VKAttachments attachments) {
+	public void showImage(LinearLayout layout, VKAttachments attachments) {
 		for (VKApiAttachment a : attachments) {
 			if (a.getClass() == VKApiPhoto.class) {
 				ImageView photo = (ImageView) mInflater.inflate(
@@ -88,8 +98,17 @@ public class CustomView {
 			}
 		}
 	}
+	
+	public void setInflater(LayoutInflater inflater) {
+		mInflater = inflater;
+	}
 
-	protected static class AnimateFirstDisplayListener extends
+	public static void refreshCountOfLike(ViewHolder viewHolder, VKApiPost post){
+		viewHolder.postCountOfLike.setText(String
+				.valueOf(post.likes_count));
+	}
+
+	public static class AnimateFirstDisplayListener extends
 			SimpleImageLoadingListener {
 
 		static final List<String> displayedImages = Collections

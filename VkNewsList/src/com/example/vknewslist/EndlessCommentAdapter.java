@@ -27,7 +27,7 @@ public class EndlessCommentAdapter extends EndlessAdapter {
 	private RotateAnimation rotate = null;
 	private View pendingView = null;
 	CommentsAdapter adapter = (CommentsAdapter) getWrappedAdapter();
-	
+
 	public EndlessCommentAdapter(ListAdapter wrapped) {
 		super(wrapped);
 		rotate = new RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF,
@@ -52,22 +52,13 @@ public class EndlessCommentAdapter extends EndlessAdapter {
 	}
 
 	@Override
-	protected boolean cacheInBackground() throws Exception { 
-		boolean m = adapter.k;
-		if (adapter.post.comments_count <= adapter.offset + adapter.count){
-			adapter.k = false;
-		}
-		return m;
-	}
-
-	@Override
-	protected void appendCachedData() {
+	protected boolean cacheInBackground() throws Exception {
 		
 		VKRequest request = VKApi.wall().getComments(
-				VKParameters.from(VKApiConst.OWNER_ID, adapter.post.owner_id,
-						VKApiConst.POST_ID, adapter.post.id,
+				VKParameters.from(VKApiConst.OWNER_ID, adapter.mPost.owner_id,
+						VKApiConst.POST_ID, adapter.mPost.id,
 						VKApiConst.NEED_LIKES, 1, VKApiConst.OFFSET,
-						adapter.offset, VKApiConst.COUNT, adapter.count,
+						adapter.mOffset, VKApiConst.COUNT, adapter.mCount,
 						VKApiConst.EXTENDED, 1));
 
 		request.executeWithListener(new VKRequestListener() {
@@ -76,16 +67,16 @@ public class EndlessCommentAdapter extends EndlessAdapter {
 				VKCommentArray comments = ((VKCommentArray) response.parsedModel);
 				// получаем список пользователей, которые упоминаются в
 				// пришедших постах
-				VKUsersArray u = new VKUsersArray();
-				u.fill(response.json.optJSONObject("response").optJSONArray(
+				VKUsersArray users = new VKUsersArray();
+				users.fill(response.json.optJSONObject("response").optJSONArray(
 						"profiles"), VKApiUser.class);
 
 				// получаем список групп, которые упоминаются в пришедших постах
-				VKApiCommunityArray g = new VKApiCommunityArray();
-				g.fill(response.json.optJSONObject("response").optJSONArray(
+				VKApiCommunityArray groups = new VKApiCommunityArray();
+				groups.fill(response.json.optJSONObject("response").optJSONArray(
 						"groups"), VKApiCommunity.class);
 
-				finish(comments, u, g);
+				finish(comments, users, groups);
 			}
 
 			@Override
@@ -93,18 +84,28 @@ public class EndlessCommentAdapter extends EndlessAdapter {
 				Log.d("Error", error.toString());
 			}
 		});
+		
+		boolean m = adapter.k;
+		if (adapter.mPost.comments_count <= adapter.mOffset + adapter.mCount) {
+			adapter.k = false;
+		}
+		return m;
 	}
 
-	void finish(VKCommentArray comments, VKUsersArray u, VKApiCommunityArray g) {
+	@Override
+	protected void appendCachedData() {
+	}
+
+	void finish(VKCommentArray comments, VKUsersArray users, VKApiCommunityArray groups) {
 		CommentsAdapter adapter = (CommentsAdapter) getWrappedAdapter();
-		adapter.comments.addAll(comments);
-		for (VKApiCommunity gr : g) {
-			adapter.groups.put(gr.id, gr);
+		adapter.mComments.addAll(comments);
+		for (VKApiCommunity group : groups) {
+			adapter.mGroups.put(group.id, group);
 		}
-		for (VKApiUser us : u) {
-			adapter.users.put(us.id, us);
+		for (VKApiUser user : users) {
+			adapter.mUsers.put(user.id, user);
 		}
-		adapter.offset += adapter.count;
+		adapter.mOffset += adapter.mCount;
 		adapter.notifyDataSetChanged();
 	}
 

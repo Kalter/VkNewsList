@@ -1,8 +1,12 @@
 package com.example.vknewslist;
 
-
 import java.util.HashMap;
 import java.util.Map;
+
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -16,30 +20,26 @@ import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
-import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.VKRequest.VKRequestListener;
+import com.vk.sdk.api.VKResponse;
 import com.vk.sdk.api.model.VKApiCommunity;
 import com.vk.sdk.api.model.VKApiCommunityArray;
 import com.vk.sdk.api.model.VKApiUser;
 import com.vk.sdk.api.model.VKPostArray;
 import com.vk.sdk.api.model.VKUsersArray;
 
-import android.app.ListFragment;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.util.Log;
+public class NewsActivity extends SherlockFragmentActivity implements
+		PostIdListener {
+	final static String POST_LIST_TAG = "PostsListFragment";
+	final static String WALL_POST_TAG = "WallPostFragment";
+	String id;
 
-public class NewsActivity extends SherlockFragmentActivity implements PostIdListener{
-	 PostsListFragment lf = new PostsListFragment();
-	 WallPostFragment f = new WallPostFragment();
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		VKUIHelper.onCreate(this);
-		createNews();		
+		createNews();
 	}
 
 	@Override
@@ -48,75 +48,47 @@ public class NewsActivity extends SherlockFragmentActivity implements PostIdList
 		VKUIHelper.onDestroy(this);
 	}
 
-
 	@Override
 	protected void onResume() {
 		super.onResume();
 		VKUIHelper.onResume(this);
 	}
-	
-	@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        VKUIHelper.onActivityResult(this, requestCode, resultCode, data);
-    }
-	
-	 void createNews() {
-		
-	        getSupportFragmentManager()
-	                .beginTransaction()
-	                .add(R.id.container, lf)
-	                .show(lf)
-	                .commit();
-	    }
-	 
-	 public void showWallPost(WallPostFragment f) {
-	        getSupportFragmentManager()
-	                .beginTransaction()
-	                .addToBackStack(null)
-	                .add(R.id.container, f)
-	                .hide(lf)
-	                .show(f)
-	                .commit();
-	    }
 
 	@Override
-	public void setId(final String s) {
-		
-		
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		VKUIHelper.onActivityResult(this, requestCode, resultCode, data);
+	}
+
+	void createNews() {
+		PostsListFragment postsListFragment = (PostsListFragment) getSupportFragmentManager()
+				.findFragmentByTag(POST_LIST_TAG);
+		if (postsListFragment == null) {
+			postsListFragment = new PostsListFragment();
+		}
+		getSupportFragmentManager().beginTransaction()
+				.add(R.id.container, postsListFragment, POST_LIST_TAG)
+				.show(postsListFragment).commit();
+	}
+
+	public void showWallPost(WallPostFragment f) {
+		PostsListFragment postsListFragment = (PostsListFragment) getSupportFragmentManager()
+				.findFragmentByTag(POST_LIST_TAG);
+		getSupportFragmentManager().beginTransaction().addToBackStack(null)
+				.add(R.id.container, f, WALL_POST_TAG).hide(postsListFragment)
+				.show(f).commit();
+	}
+
+	@Override
+	public void setId(final String id) {
+		this.id = id;
 		VKRequest request = VKApi.wall().getById(
-				VKParameters.from("posts", s, VKApiConst.EXTENDED, 1));
-
+				VKParameters.from("posts", id, VKApiConst.EXTENDED, 1));
 
 		request.executeWithListener(new VKRequestListener() {
 			@Override
 			public void onComplete(VKResponse response) {
-				VKPostArray p = (VKPostArray) response.parsedModel;
-
-				// получаем список пользователей, которые упоминаются в
-				// пришедших постах
-				VKUsersArray u = new VKUsersArray();
-				u.fill(response.json.optJSONObject("response").optJSONArray(
-						"profiles"), VKApiUser.class);
-
-				// получаем список групп, которые упоминаются в пришедших постах
-				VKApiCommunityArray g = new VKApiCommunityArray();
-				g.fill(response.json.optJSONObject("response").optJSONArray(
-						"groups"), VKApiCommunity.class);
-
-				 Map<Integer, VKApiCommunity> gg = new HashMap<Integer, VKApiCommunity>();
-				 Map<Integer, VKApiUser> uu = new HashMap<Integer, VKApiUser>();
-				 
-				for (VKApiCommunity gr : g) {
-				 gg.put(gr.id, gr);
-				}
-				for (VKApiUser us : u) {
-					uu.put(us.id, us);
-				}
-				
-				f = new WallPostFragment();
-				f.id = s;
-				
-				setupFragment(f, p, gg, uu);
+				ParseJSON  parseJSON = new ParseJSON();
+				parseJSON.execute(response);
 			}
 
 			@Override
@@ -124,15 +96,8 @@ public class NewsActivity extends SherlockFragmentActivity implements PostIdList
 				Log.d("Error", error.toString());
 			}
 		});
+	}
 
-	}
-	
-	private void setupFragment(WallPostFragment f, VKPostArray p, Map<Integer, VKApiCommunity>gg,   Map<Integer, VKApiUser> uu) {
-		f.post = p.get(0);
-		f.groups = gg;
-		f.users = uu;
-		showWallPost(f);
-	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
@@ -152,5 +117,49 @@ public class NewsActivity extends SherlockFragmentActivity implements PostIdList
 			return super.onOptionsItemSelected(item);
 		}
 	}
-	
+
+	class ParseJSON extends AsyncTask<VKResponse, Void, Void> {
+
+		@Override
+		protected Void doInBackground(VKResponse... params) {
+			VKResponse response = null;
+			for (VKResponse r : params) {
+				response = r;
+			}
+			VKPostArray p = (VKPostArray) response.parsedModel;
+
+			// get a list of users that are mentioned in the received posts
+			VKUsersArray u = new VKUsersArray();
+			u.fill(response.json.optJSONObject("response").optJSONArray(
+					"profiles"), VKApiUser.class);
+
+			// get a list of groups that are mentioned in the received posts
+			VKApiCommunityArray g = new VKApiCommunityArray();
+			g.fill(response.json.optJSONObject("response").optJSONArray(
+					"groups"), VKApiCommunity.class);
+
+			Map<Integer, VKApiCommunity> groups = new HashMap<Integer, VKApiCommunity>();
+			Map<Integer, VKApiUser> users = new HashMap<Integer, VKApiUser>();
+
+			for (VKApiCommunity group : g) {
+				groups.put(group.id, group);
+			}
+			for (VKApiUser user : u) {
+				users.put(user.id, user);
+			}
+			WallPostFragment wallPostFragment = (WallPostFragment) getSupportFragmentManager()
+					.findFragmentByTag(WALL_POST_TAG);
+			if (wallPostFragment == null) {
+				wallPostFragment = new WallPostFragment();
+				wallPostFragment.id = id;
+				wallPostFragment.post = p.get(0);
+				wallPostFragment.groups = groups;
+				wallPostFragment.users = users;
+			}
+			showWallPost(wallPostFragment);
+
+			return null;
+		}
+
+	}
 }

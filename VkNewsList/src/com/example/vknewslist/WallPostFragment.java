@@ -98,12 +98,12 @@ public class WallPostFragment extends Fragment {
 				for (VKApiUser us : u) {
 					users.put(us.id, us);
 				}
-				((ListView) getView().findViewById(R.id.comments))
-						.addHeaderView(((new PostView(post, users, groups,
-								null, getLayoutInflater(savedInstanceState),
-								getActivity())).setupPostView(container)));
+//				((ListView) getView().findViewById(R.id.comments))
+//						.addHeaderView(((new PostView(post, users, groups,
+//								null, getLayoutInflater(savedInstanceState),
+//								getActivity())).setupPostView(container)));
 				setupAdapter();
-				adapter.offset += count;
+				adapter.mOffset += count;
 				adapter.notifyDataSetChanged();
 			}
 

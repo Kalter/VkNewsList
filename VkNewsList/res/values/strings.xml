@@ -5,5 +5,7 @@
     <string name="news">Новости</string>
     <string name="share">Репост</string>
     <string name="like">Мне нравится</string>
+    <string name="view_holder"></string>
+    <string name="header_view_holder"></string>
 
 </resources>

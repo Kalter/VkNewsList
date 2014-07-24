@@ -153,8 +153,8 @@ public class PostsListFragment extends SwipeRefreshListFragment implements
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
-		idListener.setId(adapter.posts.get(position).source_id + "_"
-				+ adapter.posts.get(position).post_id);
+		idListener.setId(adapter.mPosts.get(position).source_id + "_"
+				+ adapter.mPosts.get(position).post_id);
 	}
 
 }
