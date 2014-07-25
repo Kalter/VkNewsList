@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -16,6 +15,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.vk.sdk.api.VKApi;
@@ -91,7 +91,7 @@ public class PostsListAdapter extends BaseAdapter {
 		if (convertView == null) {
 			convertView = mInflater.inflate(R.layout.wall_post_list_item,
 					parent, false);
-			mViewHolder = new ViewHolder(convertView);
+			mViewHolder = new ViewHolder(convertView, post);
 			convertView.setTag(mViewHolder);
 		} else {
 			mViewHolder = (ViewHolder) convertView.getTag();
@@ -197,124 +197,15 @@ public class PostsListAdapter extends BaseAdapter {
 		mViewHolder.postCountOfShare.setText(Integer
 				.toString(post.reposts_count));
 
-		// set listener to LIKE BUTTON
-		mViewHolder.postLikeButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				int post_id = post.post_id != 0 ? post.post_id : post.id;
-				int source_id = post.source_id != 0 ? post.source_id
-						: post.from_id;
-				if (post.user_likes) {
-					VKRequest request = VKApi.likes().delete(
-							VKParameters.from("type", "post",
-									VKApiConst.OWNER_ID,
-									String.valueOf(source_id), "item_id",
-									String.valueOf(post_id)));
-					request.useSystemLanguage = false;
-
-					request = VKRequest.getRegisteredRequest(request
-							.registerObject());
-					if (request != null) {
-						request.unregisterObject();
-					}
-					request.executeWithListener(new VKRequestListener() {
-
-						@Override
-						public void onComplete(VKResponse response) {
-							post.likes_count -= 1;
-							mViewHolder.postCountOfLike.setText(String
-									.valueOf(post.likes_count));
-
-							post.user_likes = false;
-						}
-
-						@Override
-						public void onError(VKError error) {
-							Log.d("Error", error.toString());
-						}
-					});
-
-				} else {
-					VKRequest request = VKApi.likes().add(
-							VKParameters.from("type", "post",
-									VKApiConst.OWNER_ID,
-									String.valueOf(source_id), "item_id",
-									String.valueOf(post_id)));
-
-					request.useSystemLanguage = false;
-
-					request = VKRequest.getRegisteredRequest(request
-							.registerObject());
-					if (request != null) {
-						request.unregisterObject();
-					}
-					request.executeWithListener(new VKRequestListener() {
-						@Override
-						public void onComplete(VKResponse response) {
-							post.likes_count += 1;
-							mViewHolder.postCountOfLike.setText(String
-									.valueOf(post.likes_count));
-
-							post.user_likes = true;
-						}
-
-						@Override
-						public void onError(VKError error) {
-							Log.d("Error", error.toString());
-						}
-					});
-				}
-			}
-		});
-
-		if (post.can_publish) {
-			// set listener to REPOST BUTTON
-			mViewHolder.postShareButton
-					.setOnClickListener(new OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							VKRequest request = VKApi
-									.wall()
-									.repost(VKParameters.from(
-											VKApiConst.OBJECT,
-											"wall"
-													+ String.valueOf(post.source_id)
-													+ "_"
-													+ String.valueOf(post.post_id)));
-
-							request.useSystemLanguage = false;
-
-							request = VKRequest.getRegisteredRequest(request
-									.registerObject());
-							if (request != null) {
-								request.unregisterObject();
-							}
-							request.executeWithListener(new VKRequestListener() {
-								@Override
-								public void onComplete(VKResponse response) {
-									post.reposts_count += 1;
-									mViewHolder.postCountOfShare.setText(String
-											.valueOf(post.reposts_count));
-
-									post.user_reposted = true;
-								}
-
-								@Override
-								public void onError(VKError error) {
-									Log.d("Error", error.toString());
-								}
-							});
-						}
-					});
-		} else {
+		if (!post.can_publish) {
 			mViewHolder.postShareButton.setVisibility(View.GONE);
 		}
 		return convertView;
 	}
 
 	static class ViewHolder {
+		
+		VKApiPost mPost;
 
 		@InjectView(R.id.post_share_count)
 		TextView postCountOfShare;
@@ -332,8 +223,111 @@ public class PostsListAdapter extends BaseAdapter {
 		// Linear Layout that contains all photo attachments
 		@InjectView(R.id.image_container)
 		LinearLayout imageContainer;
+		
+		@OnClick (R.id.post_like_button) void like(){
+			int post_id = mPost.post_id != 0 ? mPost.post_id : mPost.id;
+			int source_id = mPost.source_id != 0 ? mPost.source_id
+					: mPost.from_id;
+			if (mPost.user_likes) {
+				VKRequest request = VKApi.likes().delete(
+						VKParameters.from("type", "post",
+								VKApiConst.OWNER_ID,
+								String.valueOf(source_id), "item_id",
+								String.valueOf(post_id)));
+				request.useSystemLanguage = false;
 
-		public ViewHolder(View view) {
+				request = VKRequest.getRegisteredRequest(request
+						.registerObject());
+				if (request != null) {
+					request.unregisterObject();
+				}
+				request.executeWithListener(new VKRequestListener() {
+
+					@Override
+					public void onComplete(VKResponse response) {
+						mPost.likes_count -= 1;
+						postCountOfLike.setText(String
+								.valueOf(mPost.likes_count));
+
+						mPost.user_likes = false;
+					}
+
+					@Override
+					public void onError(VKError error) {
+						Log.d("Error", error.toString());
+					}
+				});
+
+			} else {
+				VKRequest request = VKApi.likes().add(
+						VKParameters.from("type", "post",
+								VKApiConst.OWNER_ID,
+								String.valueOf(source_id), "item_id",
+								String.valueOf(post_id)));
+
+				request.useSystemLanguage = false;
+
+				request = VKRequest.getRegisteredRequest(request
+						.registerObject());
+				if (request != null) {
+					request.unregisterObject();
+				}
+				request.executeWithListener(new VKRequestListener() {
+					@Override
+					public void onComplete(VKResponse response) {
+						mPost.likes_count += 1;
+						postCountOfLike.setText(String
+								.valueOf(mPost.likes_count));
+
+						mPost.user_likes = true;
+					}
+
+					@Override
+					public void onError(VKError error) {
+						Log.d("Error", error.toString());
+					}
+				});
+			}
+
+		}
+		@OnClick (R.id.post_share_button) void share(){
+
+			VKRequest request = VKApi
+					.wall()
+					.repost(VKParameters.from(
+							VKApiConst.OBJECT,
+							"wall"
+									+ String.valueOf(mPost.source_id)
+									+ "_"
+									+ String.valueOf(mPost.post_id)));
+
+			request.useSystemLanguage = false;
+
+			request = VKRequest.getRegisteredRequest(request
+					.registerObject());
+			if (request != null) {
+				request.unregisterObject();
+			}
+			request.executeWithListener(new VKRequestListener() {
+				@Override
+				public void onComplete(VKResponse response) {
+					mPost.reposts_count += 1;
+					postCountOfShare.setText(String
+							.valueOf(mPost.reposts_count));
+
+					mPost.user_reposted = true;
+				}
+
+				@Override
+				public void onError(VKError error) {
+					Log.d("Error", error.toString());
+				}
+			});
+		
+		}
+		
+		public ViewHolder(View view, VKApiPost post) {
+			this.mPost = post;
 			ButterKnife.inject(this, view);
 		}
 	}

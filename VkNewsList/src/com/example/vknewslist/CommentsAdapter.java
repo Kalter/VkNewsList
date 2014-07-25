@@ -85,7 +85,7 @@ public class CommentsAdapter extends BaseAdapter {
 		final VKApiComment comment = mComments.get(position);
 		if (convertView == null) {
 			convertView = mInflater.inflate(R.layout.comment, parent, false);
-			mViewHolder = new ViewHolder(convertView);
+			mViewHolder = new ViewHolder(convertView, comment);
 			convertView.setTag(mViewHolder);
 		} else {
 			mViewHolder = (ViewHolder) convertView.getTag();
@@ -118,70 +118,13 @@ public class CommentsAdapter extends BaseAdapter {
 			mCustomView.showImage(mViewHolder.commentImageContainer, attachments);
 		}
 
-		mViewHolder.commentLikeButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				if (comment.user_likes) {
-					VKRequest request = VKApi.likes().delete(
-							VKParameters.from("type", "comment",
-									VKApiConst.OWNER_ID,
-									String.valueOf(comment.from_id), "item_id",
-									String.valueOf(comment.id)));
-					request.useSystemLanguage = false;
-
-					request = VKRequest.getRegisteredRequest(request
-							.registerObject());
-					if (request != null) {
-						request.unregisterObject();
-					}
-					request.executeWithListener(new VKRequestListener() {
-						@Override
-						public void onComplete(VKResponse response) {
-							comment.likes -= 1;
-							mViewHolder.commentCountOfLike.setText(String
-									.valueOf(comment.likes));
-
-							comment.user_likes = false;
-						}
-
-						@Override
-						public void onError(VKError error) {
-							Log.d("Error", error.toString());
-						}
-					});
-
-				} else {
-					VKRequest request = VKApi.likes().add(
-							VKParameters.from("type", "comment",
-									VKApiConst.OWNER_ID, comment.from_id,
-									"item_id", comment.id));
-
-					if (request != null) {
-						request.unregisterObject();
-					}
-					request.executeWithListener(new VKRequestListener() {
-						@Override
-						public void onComplete(VKResponse response) {
-							comment.likes += 1;
-							mViewHolder.commentCountOfLike.setText(String
-									.valueOf(comment.likes));
-
-							comment.can_like = true;
-						}
-
-						@Override
-						public void onError(VKError error) {
-							Log.d("Error", error.toString());
-						}
-					});
-				}
-			}
-		});
 		return convertView;
 	}
 	
 	static class ViewHolder {
+		
+		VKApiComment mComment;
+		
 		@InjectView(R.id.comment_like_count)
 		TextView commentCountOfLike;
 		@InjectView(R.id.comment_like_button)
@@ -197,9 +140,67 @@ public class CommentsAdapter extends BaseAdapter {
 		@InjectView(R.id.comment_image_container)
 		LinearLayout commentImageContainer;
 		
-		public ViewHolder(View view) {
+		@OnClick(R.id.comment_like_button) void like(){
+			Log.d("---", "comment_click");
+			if (mComment.user_likes) {
+				VKRequest request = VKApi.likes().delete(
+						VKParameters.from("type", "comment",
+								VKApiConst.OWNER_ID,
+								String.valueOf(mComment.from_id), "item_id",
+								String.valueOf(mComment.id)));
+				request.useSystemLanguage = false;
+
+				request = VKRequest.getRegisteredRequest(request
+						.registerObject());
+				if (request != null) {
+					request.unregisterObject();
+				}
+				request.executeWithListener(new VKRequestListener() {
+					@Override
+					public void onComplete(VKResponse response) {
+						mComment.likes -= 1;
+						commentCountOfLike.setText(String
+								.valueOf(mComment.likes));
+
+						mComment.user_likes = false;
+					}
+
+					@Override
+					public void onError(VKError error) {
+						Log.d("Error", error.toString());
+					}
+				});
+
+			} else {
+				VKRequest request = VKApi.likes().add(
+						VKParameters.from("type", "comment",
+								VKApiConst.OWNER_ID, mComment.from_id,
+								"item_id", mComment.id));
+
+				if (request != null) {
+					request.unregisterObject();
+				}
+				request.executeWithListener(new VKRequestListener() {
+					@Override
+					public void onComplete(VKResponse response) {
+						mComment.likes += 1;
+						commentCountOfLike.setText(String
+								.valueOf(mComment.likes));
+
+						mComment.can_like = true;
+					}
+
+					@Override
+					public void onError(VKError error) {
+						Log.d("Error", error.toString());
+					}
+				});
+			}
+		}
+		
+		public ViewHolder(View view, VKApiComment comment) {
+			mComment = comment;
 			ButterKnife.inject(this, view);
 		}
 	}
-
 }
